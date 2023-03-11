@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1;
+namespace App\Http\Controllers\Api\V1\User;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
+use App\Http\Requests\V1\ChangeRoleRequest;
 use App\Http\Requests\V1\UpdateNameEmailUserRequest;
 use App\Http\Requests\v1\UpdatePasswordUserRequest;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
@@ -64,6 +64,7 @@ class UserController extends Controller
             'user' => $user
         ], 200);
     }
+
     public function updatePassword(UpdatePasswordUserRequest $request, User $user)
     {
 
@@ -90,6 +91,12 @@ class UserController extends Controller
         ], 200);
     }
 
+
+    public function changeRole(ChangeRoleRequest $request,User $user){
+        $user->syncRoles($request->validated());
+
+        return $user;
+    }
     /**
      * Remove the specified resource from storage.
      *

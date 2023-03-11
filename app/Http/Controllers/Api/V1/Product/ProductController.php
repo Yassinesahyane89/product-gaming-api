@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1;
+namespace App\Http\Controllers\Api\V1\Product;
 
-use App\Models\Product;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\StoreProductRequest;
 use App\Http\Requests\V1\UpdateProductRequest;
-use App\Http\Controllers\Controller;
 use App\Http\Resources\ProductResource;
+use App\Models\Product;
 
 class ProductController extends Controller
 {
@@ -18,6 +18,7 @@ class ProductController extends Controller
     public function index()
     {
         return ProductResource::collection(Product::all());
+        // return Product::with('category:id,name')->get();
     }
 
     /**
