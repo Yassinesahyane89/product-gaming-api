@@ -5,9 +5,7 @@ namespace App\Http\Controllers\Api\V1\Role;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\StoreRoleRequest;
 use App\Http\Requests\V1\UpdateRoleRequest;
-use App\Models\Category;
-use App\Models\User;
-use Illuminate\Http\Request;
+use App\Http\Resources\RoleResource;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 
@@ -21,22 +19,11 @@ class RoleController extends Controller
     public function index()
     {
         $roles = Role::with('permissions')->get();
-
-        $data = [];
-        foreach ($roles as $role) {
-            $data[] = [
-                'type' => 'roles',
-                'id' => $role->id,
-                'attributes' => [
-                    'name' => $role->name,
-                    'permissions' => $role->permissions->pluck('name')
-                ]
-            ];
-        }
-
         return response()->json([
-            'data' => $data
-        ]);
+            'status' => true,
+            'data' => RoleResource::collection($roles),
+            'message' => 'Roles retrieved successfully!',
+        ], 200);
     }
 
     /**
@@ -51,15 +38,9 @@ class RoleController extends Controller
         $role->syncPermissions($request->permission_ids);
 
         return response()->json([
-            'data' => [
-                'type' => 'roles',
-                'id' => $role->id,
-                'attributes' => [
-                    'name' => $role->name,
-                    'permissions' => $role->permissions->pluck('name')
-                ]
-            ],
-            'message' => "Role created successfully!"
+            'status' => true,
+            'data' => new RoleResource($role),
+            'message' => 'Role created successfully!',
         ], 201);
     }
 
@@ -72,15 +53,10 @@ class RoleController extends Controller
     public function show(Role $role)
     {
         return response()->json([
-            'data' => [
-                'type' => 'roles',
-                'id' => $role->id,
-                'attributes' => [
-                    'name' => $role->name,
-                    'permissions' => $role->permissions->pluck('name')
-                ]
-            ]
-        ]);
+            'status' => true,
+            'data' => new RoleResource($role->load('permissions')),
+            'message' => 'Role retrieved successfully!',
+        ], 200);
     }
 
     /**
@@ -96,16 +72,10 @@ class RoleController extends Controller
         $role->syncPermissions($request->permission_ids);
 
         return response()->json([
-            'data' => [
-                'type' => 'roles',
-                'id' => $role->id,
-                'attributes' => [
-                    'name' => $role->name,
-                    'permissions' => $role->permissions->pluck('name')
-                ]
-            ],
-            'message' => "Role updated successfully!"
-        ]);
+            'status' => true,
+            'data' => new RoleResource($role),
+            'message' => 'Role updated successfully!',
+        ], 200);
     }
 
     /**
@@ -119,7 +89,8 @@ class RoleController extends Controller
         $role->delete();
 
         return response()->json([
-            'message' => "Role deleted successfully!"
+            'status' => true,
+            'message' => "Role deleted successfully!",
         ]);
     }
 }
