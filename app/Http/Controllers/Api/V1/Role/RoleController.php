@@ -20,8 +20,23 @@ class RoleController extends Controller
      */
     public function index()
     {
-        // User::with('products.category')
-        return Role::with('permissions')->get();
+        $roles = Role::with('permissions')->get();
+
+        $data = [];
+        foreach ($roles as $role) {
+            $data[] = [
+                'type' => 'roles',
+                'id' => $role->id,
+                'attributes' => [
+                    'name' => $role->name,
+                    'permissions' => $role->permissions->pluck('name')
+                ]
+            ];
+        }
+
+        return response()->json([
+            'data' => $data
+        ]);
     }
 
     /**
@@ -34,10 +49,17 @@ class RoleController extends Controller
     {
         $role = Role::create(['name' => $request->name]);
         $role->syncPermissions($request->permission_ids);
+
         return response()->json([
-            'status' => true,
-            'data' => $role,
-            'message' => "product Created successfully!",
+            'data' => [
+                'type' => 'roles',
+                'id' => $role->id,
+                'attributes' => [
+                    'name' => $role->name,
+                    'permissions' => $role->permissions->pluck('name')
+                ]
+            ],
+            'message' => "Role created successfully!"
         ], 201);
     }
 
@@ -49,8 +71,16 @@ class RoleController extends Controller
      */
     public function show(Role $role)
     {
-        return $role::with('permissions')->get();
-        // return $role->load('permissions');
+        return response()->json([
+            'data' => [
+                'type' => 'roles',
+                'id' => $role->id,
+                'attributes' => [
+                    'name' => $role->name,
+                    'permissions' => $role->permissions->pluck('name')
+                ]
+            ]
+        ]);
     }
 
     /**
@@ -62,10 +92,20 @@ class RoleController extends Controller
      */
     public function update(UpdateRoleRequest $request, Role $role)
     {
-        $role->update(['name'=>$request->name]);
+        $role->update(['name' => $request->name]);
         $role->syncPermissions($request->permission_ids);
 
-        return $role;
+        return response()->json([
+            'data' => [
+                'type' => 'roles',
+                'id' => $role->id,
+                'attributes' => [
+                    'name' => $role->name,
+                    'permissions' => $role->permissions->pluck('name')
+                ]
+            ],
+            'message' => "Role updated successfully!"
+        ]);
     }
 
     /**
@@ -74,8 +114,12 @@ class RoleController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Role $role)
     {
-        //
+        $role->delete();
+
+        return response()->json([
+            'message' => "Role deleted successfully!"
+        ]);
     }
 }
