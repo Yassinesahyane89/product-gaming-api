@@ -36,12 +36,12 @@ Route::controller(AuthController::class)->group(function () {
  * Profil
  */
 
-Route::group(['controller' => UserController::class, 'prefix' => 'users'], function () {
+Route::group(['controller' => UserController::class, 'prefix' =>'users', 'middleware' => 'auth:api'], function () {
     Route::get('', 'index')->middleware(['permission:view my profil|view all profil']);
     Route::put('updateNameEmail/{user}', 'updateNameEmail')->middleware(['permission:edit my profil|edit all profil']);
     Route::put('updatePassword/{user}', 'updatePassword')->middleware(['permission:edit my profil|edit all profil']);
     Route::delete('/{user}', 'destroy')->middleware(['permission:delete my profil|delete all profil']);
-    Route::put('changerole/{user}', 'changeRole');
+    Route::put('changerole/{user}', 'changeRole')->middleware(['permission:change role user']);
 });
 
 /**
@@ -71,6 +71,13 @@ Route::controller(ProductController::class)->group(function () {
     Route::get('/products/{product}', 'show');
 });
 
+/**
+ * Role
+ */
 
-
-Route::apiResource('roles',RoleController::class);
+Route::group(['controller' => RoleController::class, 'prefix' => 'roles','middleware'=>'auth:api'], function () {
+    Route::get('', 'index')->middleware(['permission:view role']);
+    Route::post('', 'store')->middleware(['permission:add role']);
+    Route::get('/{role}', 'show')->middleware(['permission:view role']);
+    Route::put('/{role}', 'update')->middleware(['permission:edit role']);
+});

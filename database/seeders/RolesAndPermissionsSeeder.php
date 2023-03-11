@@ -37,6 +37,10 @@ class RolesAndPermissionsSeeder extends Seeder
         $deleteCategory = 'delete category';
         $viewCategory = 'view category';
 
+        $addRole = 'add role';
+        $editRole = 'edit role';
+        $changeRoleUser = 'change role user';
+        $viewRole = 'view role';
 
         Permission::create(['name' => $editMyProfil]);
         Permission::create(['name' => $editAllProfil]);
@@ -55,6 +59,11 @@ class RolesAndPermissionsSeeder extends Seeder
         Permission::create(['name' => $editCategory]);
         Permission::create(['name' => $deleteCategory]);
         Permission::create(['name' => $viewCategory]);
+
+        Permission::create(['name' => $addRole]);
+        Permission::create(['name' => $editRole]);
+        Permission::create(['name' => $changeRoleUser]);
+        Permission::create(['name' => $viewRole]);
 
         // Define roles available
         $admin = 'admin';
