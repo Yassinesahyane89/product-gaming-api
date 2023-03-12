@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\ChangeRoleRequest;
 use App\Http\Requests\V1\UpdateNameEmailUserRequest;
 use App\Http\Requests\v1\UpdatePasswordUserRequest;
+use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
@@ -20,19 +22,18 @@ class UserController extends Controller
     public function index()
     {
         $user = Auth::user();
-        if ($user->can('view my profil') && !$user->can('view all profil')) {
-            $users = User::find($user->id);
+        if (!$user->can('view all profil')) {
             return response()->json([
-                'status' => 'success',
-                'users' => $users
-            ]);
+                'status' => true,
+                'message' => 'User retrieved successfully!',
+                'data' => new UserResource($user),
+            ], Response::HTTP_OK);
         }
-        $users = User::orderBy('id')->get();
-
         return response()->json([
-            'status' => 'success',
-            'users' => $users
-        ]);
+            'status' => true,
+            'message' => 'Users retrieved successfully!',
+            'data' => UserResource::collection(User::all()),
+        ], Response::HTTP_OK);
     }
 
     /**
@@ -42,60 +43,83 @@ class UserController extends Controller
      * @param  \App\Models\User  $user
      * @return \Illuminate\Http\Response
      */
-    public function updateNameEmail(UpdateNameEmailUserRequest $request, User $user)
+    public function updateNameEmail(UpdateNameEmailUserRequest $request, $id)
     {
-        $userauth = Auth::user();
-        if ($userauth->can('edit my profil') && $userauth->id != $user->id) {
+        $user = User::find($id);
+
+        if (!$user) {
             return response()->json([
                 'status' => false,
-                'message' => 'You dont have permission to Update tis user'
-            ], 200);
+                'message' => 'User not found'
+            ], Response::HTTP_NOT_FOUND);
+        }
+
+        $userauth = Auth::user();
+        if (!$userauth->can('edit all profil') && $userauth->id != $user->id) {
+            return response()->json([
+                'status' => false,
+                'message' => 'You dont have permission to Update this user'
+            ], Response::HTTP_FORBIDDEN);
         }
 
         $user->update($request->validated());
 
-        if (!$user) {
-            return response()->json(['message' => 'User not found'], 404);
-        }
-
         return response()->json([
             'status' => true,
-            'message' => "User Updated successfully!",
-            'user' => $user
-        ], 200);
+            'message' => "User updated successfully!",
+            'data' => new UserResource($user)
+        ], Response::HTTP_OK);
     }
 
-    public function updatePassword(UpdatePasswordUserRequest $request, User $user)
+    public function updatePassword(UpdatePasswordUserRequest $request, $id)
     {
+        $user = User::find($id);
+
+        if (!$user) {
+            return response()->json([
+                'status' => false,
+                'message' => 'User not found'
+            ], Response::HTTP_NOT_FOUND);
+        }
 
         $userauth = Auth::user();
 
-        if ($userauth->can('edit my profil') && !$userauth->can('edit all profil') && $userauth->id != $user->id) {
+        if (!$userauth->can('edit all profil') && !$userauth->can('edit all profil') && $userauth->id != $user->id) {
             return response()->json([
-                'status' => true,
-                'message' => 'You dont have permission to Update tis user'
-            ], 200);
+                'status' => false,
+                'message' => 'You dont have permission to Update this user'
+            ], Response::HTTP_FORBIDDEN);
         }
         $user->update([
             'password' => Hash::make($request->validated())
         ]);
 
-        if (!$user) {
-            return response()->json(['message' => 'User not found'], 404);
-        }
-
         return response()->json([
             'status' => true,
-            'message' => "User Updated successfully!",
-            'user' => $user
-        ], 200);
+            'message' => "User updated successfully!",
+            'data' => new UserResource($user)
+        ], Response::HTTP_OK);
     }
 
 
-    public function changeRole(ChangeRoleRequest $request,User $user){
+    public function changeRole(ChangeRoleRequest $request,$id){
+
+        $user = User::find($id);
+
+        if (!$user) {
+            return response()->json([
+                'status' => false,
+                'message' => 'User not found'
+            ], Response::HTTP_NOT_FOUND);
+        }
+
         $user->syncRoles($request->validated());
 
-        return $user;
+        return response()->json([
+            'status' => true,
+            'message' => "User updated successfully!",
+            'data' => new UserResource($user)
+        ], Response::HTTP_OK);
     }
     /**
      * Remove the specified resource from storage.
@@ -103,19 +127,29 @@ class UserController extends Controller
      * @param  \App\Models\User  $user
      * @return \Illuminate\Http\Response
      */
-    public function destroy(User $user)
+    public function destroy($id)
     {
+        $user = User::find($id);
+
+        if (!$user) {
+            return response()->json([
+                'status' => false,
+                'message' => 'User not found'
+            ], Response::HTTP_NOT_FOUND);
+        }
+
         $userauth = Auth::user();
         if (!$userauth->can('delete all profil') && $userauth->id != $user->id) {
-            return response()->json([
-                'status' => true,
-                'message' => 'You dont have permission to delete tis user'
-            ], 200);
+           return response()->json([
+                'status' => false,
+                'message' => "You don't have permission to delete this user!",
+            ], Response::HTTP_FORBIDDEN);
         }
         $user->delete();
-        return response()->json([
+
+         return response()->json([
             'status' => true,
             'message' => 'User deleted successfully'
-        ], 200);
+        ], Response::HTTP_OK);
     }
 }

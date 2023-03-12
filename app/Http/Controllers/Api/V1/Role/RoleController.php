@@ -7,7 +7,7 @@ use App\Http\Requests\V1\StoreRoleRequest;
 use App\Http\Requests\V1\UpdateRoleRequest;
 use App\Http\Resources\RoleResource;
 use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;
+use Illuminate\Http\Response;
 
 class RoleController extends Controller
 {
@@ -21,9 +21,9 @@ class RoleController extends Controller
         $roles = Role::with('permissions')->get();
         return response()->json([
             'status' => true,
-            'data' => RoleResource::collection($roles),
             'message' => 'Roles retrieved successfully!',
-        ], 200);
+            'data' => RoleResource::collection($roles),
+        ], Response::HTTP_OK);
     }
 
     /**
@@ -39,9 +39,9 @@ class RoleController extends Controller
 
         return response()->json([
             'status' => true,
-            'data' => new RoleResource($role),
             'message' => 'Role created successfully!',
-        ], 201);
+            'data' => new RoleResource($role),
+        ], Response::HTTP_CREATED);
     }
 
     /**
@@ -50,13 +50,21 @@ class RoleController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(Role $role)
+    public function show($id)
     {
+        $role = Role::find($id);
+        if (!$role) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Role not found'
+            ], Response::HTTP_NOT_FOUND);
+        }
+
         return response()->json([
             'status' => true,
-            'data' => new RoleResource($role->load('permissions')),
             'message' => 'Role retrieved successfully!',
-        ], 200);
+            'data' => new RoleResource($role->load('permissions')),
+        ], Response::HTTP_OK);
     }
 
     /**
@@ -66,16 +74,24 @@ class RoleController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(UpdateRoleRequest $request, Role $role)
+    public function update(UpdateRoleRequest $request, $id)
     {
+        $role = Role::find($id);
+
+        if (!$role) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Role not found'
+            ], Response::HTTP_NOT_FOUND);
+        }
         $role->update(['name' => $request->name]);
         $role->syncPermissions($request->permission_ids);
 
         return response()->json([
             'status' => true,
-            'data' => new RoleResource($role),
             'message' => 'Role updated successfully!',
-        ], 200);
+            'data' => new RoleResource($role),
+        ], Response::HTTP_OK);
     }
 
     /**
@@ -84,13 +100,22 @@ class RoleController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Role $role)
+    public function destroy($id)
     {
+        $role = Role::find($id);
+
+        if (!$role) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Role not found'
+            ], Response::HTTP_NOT_FOUND);
+        }
+
         $role->delete();
 
         return response()->json([
             'status' => true,
             'message' => "Role deleted successfully!",
-        ]);
+        ], Response::HTTP_OK);
     }
 }

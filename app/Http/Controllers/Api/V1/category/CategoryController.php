@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Api\V1\category;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\StoreCategoryRequest;
 use App\Http\Requests\V1\UpdateCategoryRequest;
+use App\Http\Resources\CategoryResource;
 use App\Models\Category;
+use Illuminate\Http\Response;
 
 class CategoryController extends Controller
 {
@@ -16,12 +18,11 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        $categories = Category::orderBy('id')->get();
-
         return response()->json([
-            'status' => 'success',
-            'categories' => $categories
-        ]);
+            'status' => true,
+            'message' => 'Categories retrieved successfully!',
+            'data' => CategoryResource::collection(Category::all()),
+        ], Response::HTTP_OK);
     }
 
     /**
@@ -32,13 +33,13 @@ class CategoryController extends Controller
      */
     public function store(StoreCategoryRequest $request)
     {
-        $category = Category::create($request->all());
+        $category = Category::create($request->validated());
 
         return response()->json([
             'status' => true,
-            'message' => "Category Created successfully!",
-            'category' => $category
-        ], 201);
+            'message' => "Category created successfully!",
+            'data' => new CategoryResource($category)
+        ], Response::HTTP_CREATED);
     }
 
     /**
@@ -47,13 +48,21 @@ class CategoryController extends Controller
      * @param  \App\Models\Category  $category
      * @return \Illuminate\Http\Response
      */
-    public function show(Category $category)
+    public function show($id)
     {
-        $category->find($category->id);
+        $category = Category::find($id);
         if (!$category) {
-            return response()->json(['message' => 'Category not found'], 404);
+            return response()->json([
+                'status' => false,
+                'message' => 'Category not found'
+            ], Response::HTTP_NOT_FOUND);
         }
-        return response()->json($category, 200);
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Category retrieved successfully!',
+            'data' => new CategoryResource($category),
+        ], Response::HTTP_OK);
     }
 
     /**
@@ -63,19 +72,24 @@ class CategoryController extends Controller
      * @param  \App\Models\Category  $category
      * @return \Illuminate\Http\Response
      */
-    public function update(UpdateCategoryRequest $request, Category $category)
+    public function update(UpdateCategoryRequest $request, $id)
     {
-        $category->update($request->all());
+        $category = Category::find($id);
 
         if (!$category) {
-            return response()->json(['message' => 'Category not found'], 404);
+            return response()->json([
+                'status' => false,
+                'message' => 'Category not found'
+            ], Response::HTTP_NOT_FOUND);
         }
+
+        $category->update($request->validated());
 
         return response()->json([
             'status' => true,
-            'message' => "Category Updated successfully!",
-            'category' => $category
-        ], 200);
+            'message' => "Category updated successfully!",
+            'data' => new CategoryResource($category)
+        ], Response::HTTP_OK);
     }
 
     /**
@@ -84,19 +98,22 @@ class CategoryController extends Controller
      * @param  \App\Models\Category  $category
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Category $category)
+    public function destroy($id)
     {
-        $category->delete();
+        $category = Category::find($id);
 
         if (!$category) {
             return response()->json([
+                'status' => false,
                 'message' => 'Category not found'
-            ], 404);
+            ], Response::HTTP_NOT_FOUND);
         }
+
+        $category->delete();
 
         return response()->json([
             'status' => true,
-            'message' => 'Category deleted successfully'
-        ], 200);
+            'message' => 'category deleted successfully'
+        ], Response::HTTP_OK);
     }
 }

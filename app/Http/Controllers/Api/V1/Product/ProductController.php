@@ -7,6 +7,8 @@ use App\Http\Requests\V1\StoreProductRequest;
 use App\Http\Requests\V1\UpdateProductRequest;
 use App\Http\Resources\ProductResource;
 use App\Models\Product;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
 
 class ProductController extends Controller
 {
@@ -17,8 +19,11 @@ class ProductController extends Controller
      */
     public function index()
     {
-        return ProductResource::collection(Product::all());
-        // return Product::with('category:id,name')->get();
+        return response()->json([
+            'status' => true,
+            'message' => 'Products retrieved successfully!',
+            'data' => ProductResource::collection(Product::all()),
+        ], Response::HTTP_OK);
     }
 
     /**
@@ -29,11 +34,13 @@ class ProductController extends Controller
      */
     public function store(StoreProductRequest $request)
     {
-        $product = Product::create($request->all() + ['user_id' => Auth()->user()->id]);
+        $product = Product::create($request->validated() + ['user_id' => Auth::id()]);
+
         return response()->json([
             'status' => true,
-            'message' => "product Created successfully!",
-        ], 201);
+            'message' => "Product created successfully!",
+            'data' => new ProductResource($product)
+        ], Response::HTTP_CREATED);
     }
 
     /**
@@ -42,12 +49,21 @@ class ProductController extends Controller
      * @param  \App\Models\Product  $product
      * @return \Illuminate\Http\Response
      */
-    public function show(Product $product)
+    public function show($id)
     {
+        $product = Product::find($id);
         if (!$product) {
-            return response()->json(['message' => 'Product not found'], 404);
+            return response()->json([
+                'status' => false,
+                'message' => 'Product not found'
+            ], Response::HTTP_NOT_FOUND);
         }
-        return new ProductResource($product);
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Product retrieved successfully!',
+            'data' => new ProductResource($product),
+        ], Response::HTTP_OK);
     }
 
     /**
@@ -57,26 +73,32 @@ class ProductController extends Controller
      * @param  \App\Models\Product  $product
      * @return \Illuminate\Http\Response
      */
-    public function update(UpdateProductRequest $request, Product $product)
+    public function update(UpdateProductRequest $request, $id)
     {
-        $user = Auth()->user();
-        if (!$user->can('edit All product')  && $user->id != $product->user_id) {
+        $product = Product::find($id);
+
+        if (!$product) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Product not found'
+            ], Response::HTTP_NOT_FOUND);
+        }
+
+        $user = Auth::user();
+        if (!$user->can('edit All product') && $user->id != $product->user_id) {
             return response()->json([
                 'status' => false,
                 'message' => "You don't have permission to edit this product!",
-            ], 200);
+            ], Response::HTTP_FORBIDDEN);
         }
-        $product->update($request->all());
 
-        if (!$product) {
-            return response()->json(['message' => 'product not found'], 404);
-        }
+        $product->update($request->validated());
 
         return response()->json([
             'status' => true,
-            'message' => "product Updated successfully!",
-            'product' => $product
-        ], 200);
+            'message' => "Product updated successfully!",
+            'data' => new ProductResource($product)
+        ], Response::HTTP_OK);
     }
 
     /**
@@ -85,26 +107,30 @@ class ProductController extends Controller
      * @param  \App\Models\Product  $product
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Product $product)
+    public function destroy($id)
     {
-        $user = Auth()->user();
-        if (!$user->can('edit All product')  && $user->id != $product->user_id) {
-            return response()->json([
-                'status' => false,
-                'message' => "You don't have permission to delete this product!",
-            ], 200);
-        }
-        $product->delete();
+        $product = Product::find($id);
 
         if (!$product) {
             return response()->json([
-                'message' => 'product not found'
-            ], 404);
+                'status' => false,
+                'message' => 'Product not found'
+            ], Response::HTTP_NOT_FOUND);
         }
+
+        $user = Auth::user();
+        if (!$user->can('edit All product') && $user->id != $product->user_id) {
+            return response()->json([
+                'status' => false,
+                'message' => "You don't have permission to delete this product!",
+            ], Response::HTTP_FORBIDDEN);
+        }
+
+        $product->delete();
 
         return response()->json([
             'status' => true,
-            'message' => 'product deleted successfully'
-        ], 200);
+            'message' => 'Product deleted successfully'
+        ], Response::HTTP_OK);
     }
 }
