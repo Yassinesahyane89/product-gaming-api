@@ -43,16 +43,8 @@ class UserController extends Controller
      * @param  \App\Models\User  $user
      * @return \Illuminate\Http\Response
      */
-    public function updateNameEmail(UpdateNameEmailUserRequest $request, $id)
+    public function updateNameEmail(UpdateNameEmailUserRequest $request, User $user)
     {
-        $user = User::find($id);
-
-        if (!$user) {
-            return response()->json([
-                'status' => false,
-                'message' => 'User not found'
-            ], Response::HTTP_NOT_FOUND);
-        }
 
         $userauth = Auth::user();
         if (!$userauth->can('edit all profil') && $userauth->id != $user->id) {
@@ -71,16 +63,8 @@ class UserController extends Controller
         ], Response::HTTP_OK);
     }
 
-    public function updatePassword(UpdatePasswordUserRequest $request, $id)
+    public function updatePassword(UpdatePasswordUserRequest $request, User $user)
     {
-        $user = User::find($id);
-
-        if (!$user) {
-            return response()->json([
-                'status' => false,
-                'message' => 'User not found'
-            ], Response::HTTP_NOT_FOUND);
-        }
 
         $userauth = Auth::user();
 
@@ -102,16 +86,7 @@ class UserController extends Controller
     }
 
 
-    public function changeRole(ChangeRoleRequest $request,$id){
-
-        $user = User::find($id);
-
-        if (!$user) {
-            return response()->json([
-                'status' => false,
-                'message' => 'User not found'
-            ], Response::HTTP_NOT_FOUND);
-        }
+    public function changeRole(ChangeRoleRequest $request,User $user){
 
         $user->syncRoles($request->validated());
 
@@ -127,17 +102,8 @@ class UserController extends Controller
      * @param  \App\Models\User  $user
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(User $user)
     {
-        $user = User::find($id);
-
-        if (!$user) {
-            return response()->json([
-                'status' => false,
-                'message' => 'User not found'
-            ], Response::HTTP_NOT_FOUND);
-        }
-
         $userauth = Auth::user();
         if (!$userauth->can('delete all profil') && $userauth->id != $user->id) {
            return response()->json([

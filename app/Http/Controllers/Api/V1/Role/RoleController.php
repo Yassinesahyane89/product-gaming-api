@@ -18,7 +18,7 @@ class RoleController extends Controller
      */
     public function index()
     {
-        $roles = Role::with('permissions')->get();
+        $roles = Role::all();
         return response()->json([
             'status' => true,
             'message' => 'Roles retrieved successfully!',
@@ -50,16 +50,8 @@ class RoleController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Role $role)
     {
-        $role = Role::find($id);
-        if (!$role) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Role not found'
-            ], Response::HTTP_NOT_FOUND);
-        }
-
         return response()->json([
             'status' => true,
             'message' => 'Role retrieved successfully!',
@@ -74,16 +66,8 @@ class RoleController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(UpdateRoleRequest $request, $id)
+    public function update(UpdateRoleRequest $request, Role $role)
     {
-        $role = Role::find($id);
-
-        if (!$role) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Role not found'
-            ], Response::HTTP_NOT_FOUND);
-        }
         $role->update(['name' => $request->name]);
         $role->syncPermissions($request->permission_ids);
 
@@ -100,16 +84,8 @@ class RoleController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Role $role)
     {
-        $role = Role::find($id);
-
-        if (!$role) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Role not found'
-            ], Response::HTTP_NOT_FOUND);
-        }
 
         $role->delete();
 

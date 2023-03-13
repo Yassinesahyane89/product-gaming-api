@@ -49,16 +49,9 @@ class ProductController extends Controller
      * @param  \App\Models\Product  $product
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Product $product)
     {
-        $product = Product::find($id);
-        if (!$product) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Product not found'
-            ], Response::HTTP_NOT_FOUND);
-        }
-
+        // Data bindig
         return response()->json([
             'status' => true,
             'message' => 'Product retrieved successfully!',
@@ -73,16 +66,8 @@ class ProductController extends Controller
      * @param  \App\Models\Product  $product
      * @return \Illuminate\Http\Response
      */
-    public function update(UpdateProductRequest $request, $id)
+    public function update(UpdateProductRequest $request, Product $product)
     {
-        $product = Product::find($id);
-
-        if (!$product) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Product not found'
-            ], Response::HTTP_NOT_FOUND);
-        }
 
         $user = Auth::user();
         if (!$user->can('edit All product') && $user->id != $product->user_id) {
@@ -107,16 +92,8 @@ class ProductController extends Controller
      * @param  \App\Models\Product  $product
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Product $product)
     {
-        $product = Product::find($id);
-
-        if (!$product) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Product not found'
-            ], Response::HTTP_NOT_FOUND);
-        }
 
         $user = Auth::user();
         if (!$user->can('edit All product') && $user->id != $product->user_id) {

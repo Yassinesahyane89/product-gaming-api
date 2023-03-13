@@ -59,7 +59,7 @@ class AuthController extends Controller
                 'type' => 'bearer',
             ]
         ]);
-    }
+    } 
 
     public function logout()
     {

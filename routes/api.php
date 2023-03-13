@@ -36,7 +36,7 @@ Route::controller(AuthController::class)->group(function () {
  * Profil
  */
 
-Route::group(['controller' => UserController::class, 'prefix' =>'users', 'middleware' => 'auth:api'], function () {
+Route::group(['controller' => UserController::class, 'prefix' => 'v1/users', 'middleware' => 'auth:api'], function () {
     Route::get('', 'index')->middleware(['permission:view my profil|view all profil']);
     Route::put('updateNameEmail/{user}', 'updateNameEmail')->middleware(['permission:edit my profil|edit all profil']);
     Route::put('updatePassword/{user}', 'updatePassword')->middleware(['permission:edit my profil|edit all profil']);
@@ -48,7 +48,7 @@ Route::group(['controller' => UserController::class, 'prefix' =>'users', 'middle
  * Category
  */
 
-Route::group(['controller' => CategoryController::class, 'prefix' => 'categories','middleware'=>'auth:api'], function () {
+Route::group(['controller' => CategoryController::class, 'prefix' => 'v1/categories','middleware'=>'auth:api'], function () {
     Route::get('', 'index')->middleware(['permission:view category']);
     Route::post('', 'store')->middleware(['permission:add category']);
     Route::get('/{category}', 'show')->middleware(['permission:view category']);
@@ -60,7 +60,7 @@ Route::group(['controller' => CategoryController::class, 'prefix' => 'categories
  * Product
  */
 
-Route::group(['controller' => ProductController::class, 'prefix' => 'products','middleware'=>'auth:api'], function () {
+Route::group(['controller' => ProductController::class, 'prefix' => 'v1/products','middleware'=>'auth:api'], function () {
     Route::post('', 'store')->middleware(['permission:add product']);
     Route::put('/{product}', 'update')->middleware(['permission:edit All product|edit My product']);
     Route::delete('/{product}', 'destroy')->middleware(['permission:delete All product|delete My product']);
@@ -75,7 +75,7 @@ Route::controller(ProductController::class)->group(function () {
  * Role
  */
 
-Route::group(['controller' => RoleController::class, 'prefix' => 'roles','middleware'=>'auth:api'], function () {
+Route::group(['controller' => RoleController::class, 'prefix' => 'v1/roles','middleware'=>'auth:api'], function () {
     Route::get('', 'index')->middleware(['permission:view role']);
     Route::post('', 'store')->middleware(['permission:add role']);
     Route::get('/{role}', 'show')->middleware(['permission:view role']);

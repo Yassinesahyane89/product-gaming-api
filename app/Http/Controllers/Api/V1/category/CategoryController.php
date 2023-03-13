@@ -48,16 +48,8 @@ class CategoryController extends Controller
      * @param  \App\Models\Category  $category
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Category $category)
     {
-        $category = Category::find($id);
-        if (!$category) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Category not found'
-            ], Response::HTTP_NOT_FOUND);
-        }
-
         return response()->json([
             'status' => true,
             'message' => 'Category retrieved successfully!',
@@ -72,16 +64,8 @@ class CategoryController extends Controller
      * @param  \App\Models\Category  $category
      * @return \Illuminate\Http\Response
      */
-    public function update(UpdateCategoryRequest $request, $id)
+    public function update(UpdateCategoryRequest $request, Category $category)
     {
-        $category = Category::find($id);
-
-        if (!$category) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Category not found'
-            ], Response::HTTP_NOT_FOUND);
-        }
 
         $category->update($request->validated());
 
@@ -98,16 +82,8 @@ class CategoryController extends Controller
      * @param  \App\Models\Category  $category
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Category $category)
     {
-        $category = Category::find($id);
-
-        if (!$category) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Category not found'
-            ], Response::HTTP_NOT_FOUND);
-        }
 
         $category->delete();
 
