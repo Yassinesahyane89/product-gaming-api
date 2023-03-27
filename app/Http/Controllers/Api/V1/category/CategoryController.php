@@ -77,8 +77,14 @@ class CategoryController extends Controller
         ], Response::HTTP_OK);
     }
 
-    public function ProductCategory(Request $request){
-        return Category::with('products');
+    public function getProductsByCategoryName($name)
+    {
+        $category = Category::where('name', $name)->first();
+        if (!$category) {
+            return response()->json(['message' => 'Category not found'], 404);
+        }
+        $products = $category->products;
+        return response()->json($products);
     }
     /**
      * Remove the specified resource from storage.
