@@ -22,7 +22,7 @@ class StoreRoleRequest extends FormRequest
      * @return array<string, mixed>
      */
     public function rules()
-    {
+    { 
         return [
             'name' => 'required|exists',
             'permission_ids' => 'required|array'

@@ -54,6 +54,7 @@ Route::group(['controller' => CategoryController::class, 'prefix' => 'v1/categor
     Route::get('/{category}', 'show')->middleware(['permission:view category']);
     Route::put('/{category}', 'update')->middleware(['permission:edit category']);
     Route::delete('/{category}', 'destroy')->middleware(['permission:delete category']);
+    Route::delete('/products/{category}', 'ProductCategory');
 });
 
 /**

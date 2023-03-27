@@ -75,7 +75,7 @@ class UserController extends Controller
             ], Response::HTTP_FORBIDDEN);
         }
         $user->update([
-            'password' => Hash::make($request->validated())
+            'password' => Hash::make($request->password)
         ]);
 
         return response()->json([
@@ -119,3 +119,5 @@ class UserController extends Controller
         ], Response::HTTP_OK);
     }
 }
+
+

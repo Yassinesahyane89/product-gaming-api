@@ -52,6 +52,7 @@ class ProductController extends Controller
     public function show(Product $product)
     {
         // Data bindig
+
         return response()->json([
             'status' => true,
             'message' => 'Product retrieved successfully!',

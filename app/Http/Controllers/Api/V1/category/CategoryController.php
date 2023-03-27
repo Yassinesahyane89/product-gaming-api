@@ -7,6 +7,7 @@ use App\Http\Requests\V1\StoreCategoryRequest;
 use App\Http\Requests\V1\UpdateCategoryRequest;
 use App\Http\Resources\CategoryResource;
 use App\Models\Category;
+use GuzzleHttp\Psr7\Request;
 use Illuminate\Http\Response;
 
 class CategoryController extends Controller
@@ -76,6 +77,9 @@ class CategoryController extends Controller
         ], Response::HTTP_OK);
     }
 
+    public function ProductCategory(Request $request){
+        return Category::with('products');
+    }
     /**
      * Remove the specified resource from storage.
      *
